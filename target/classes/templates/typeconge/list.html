@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Types de congé')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/menu :: menu}" th:with="activePage='types'"></div>
+    <div class="main-content flex-grow-1">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-tag-fill text-success me-2"></i>Types de congé</h2>
+                <p class="text-muted mb-0">Gérez les types de congé et leurs quotas annuels</p>
+            </div>
+            <a href="/types-conge/new" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i> Nouveau type
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Libellé</th>
+                            <th>Quota annuel (jours)</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(types)}">
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-1"></i> Aucun type de congé configuré.
+                            </td>
+                        </tr>
+                        <tr th:each="type : ${types}">
+                            <td class="text-muted small" th:text="${type.id}"></td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success fw-semibold px-3 py-2"
+                                      th:text="${type.libelle}"></span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height:8px;max-width:120px;">
+                                        <div class="progress-bar bg-success"
+                                             th:style="'width:' + (${type.quotaAnnuel} * 100 / 60) + '%'"></div>
+                                    </div>
+                                    <span class="fw-bold text-success" th:text="${type.quotaAnnuel} + ' j'"></span>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{/types-conge/edit/{id}(id=${type.id})}" class="btn btn-sm btn-outline-warning me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/types-conge/delete/{id}(id=${type.id})}"
+                                   onclick="return confirm('Supprimer ce type de congé ?')"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-muted small" th:text="'Total : ' + ${types.size()} + ' type(s)'"></div>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

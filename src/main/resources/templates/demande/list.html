@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Demandes de congé')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/menu :: menu}" th:with="activePage='demandes'"></div>
+    <div class="main-content flex-grow-1">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-text-fill text-warning me-2"></i>Demandes de congé</h2>
+                <p class="text-muted mb-0">Consultez, filtrez et gérez les demandes</p>
+            </div>
+            <a href="/demandes/new" class="btn btn-warning text-dark fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Nouvelle demande
+            </a>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card p-3 mb-4">
+            <form method="get" action="/demandes" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Statut</label>
+                    <select name="statut" class="form-select form-select-sm">
+                        <option value="">Tous</option>
+                        <option value="en attente"  th:selected="${statut == 'en attente'}">En attente</option>
+                        <option value="accepté"     th:selected="${statut == 'accepté'}">Accepté</option>
+                        <option value="refusé"      th:selected="${statut == 'refusé'}">Refusé</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Département</label>
+                    <input type="text" name="departement" class="form-control form-control-sm"
+                           placeholder="Ex : RH" th:value="${departement}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Type de congé</label>
+                    <select name="typeCongeId" class="form-select form-select-sm">
+                        <option value="">Tous</option>
+                        <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.libelle}"
+                                th:selected="${typeCongeId == t.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Du</label>
+                    <input type="date" name="debut" class="form-control form-control-sm"
+                           th:value="${debut}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Au</label>
+                    <input type="date" name="fin" class="form-control form-control-sm"
+                           th:value="${fin}"/>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-warning btn-sm text-dark flex-grow-1">
+                        <i class="bi bi-funnel"></i> Filtrer
+                    </button>
+                    <a href="/demandes" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tableau -->
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Employé</th>
+                            <th>Département</th>
+                            <th>Type</th>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Jours</th>
+                            <th>Motif</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(demandes)}">
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-1"></i> Aucune demande trouvée.
+                            </td>
+                        </tr>
+                        <tr th:each="d : ${demandes}">
+                            <td class="text-muted small" th:text="${d.id}"></td>
+                            <td class="fw-semibold" th:text="${d.employe.nom}"></td>
+                            <td>
+                                <span class="badge bg-light text-dark border" th:text="${d.employe.departement}"></span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success"
+                                      th:text="${d.typeConge.libelle}"></span>
+                            </td>
+                            <td th:text="${#temporals.format(d.dateDebut,'dd/MM/yyyy')}"></td>
+                            <td th:text="${#temporals.format(d.dateFin,'dd/MM/yyyy')}"></td>
+                            <td>
+                                <span class="fw-bold text-primary" th:text="${d.nombreJours} + ' j'"></span>
+                            </td>
+                            <td class="text-muted small" th:text="${d.motif != null ? d.motif : '—'}"></td>
+                            <td>
+                                <span th:if="${d.statut == 'en attente'}"  class="badge badge-en-attente"><i class="bi bi-hourglass-split me-1"></i>En attente</span>
+                                <span th:if="${d.statut == 'accepté'}"    class="badge badge-accepte"><i class="bi bi-check-circle me-1"></i>Accepté</span>
+                                <span th:if="${d.statut == 'refusé'}"     class="badge badge-refuse"><i class="bi bi-x-circle me-1"></i>Refusé</span>
+                            </td>
+                            <td class="text-end">
+                                <!-- Valider / Refuser si en attente -->
+                                <a th:if="${d.statut == 'en attente'}"
+                                   th:href="@{/demandes/statut/{id}(id=${d.id},statut='accepté')}"
+                                   class="btn btn-sm btn-outline-success me-1" title="Valider">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                                <a th:if="${d.statut == 'en attente'}"
+                                   th:href="@{/demandes/statut/{id}(id=${d.id},statut='refusé')}"
+                                   class="btn btn-sm btn-outline-danger me-1" title="Refuser">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                                <!-- Remettre en attente si déjà traité -->
+                                <a th:if="${d.statut != 'en attente'}"
+                                   th:href="@{/demandes/statut/{id}(id=${d.id},statut='en attente')}"
+                                   class="btn btn-sm btn-outline-secondary me-1" title="Remettre en attente">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
+                                <a th:href="@{/demandes/edit/{id}(id=${d.id})}" class="btn btn-sm btn-outline-warning me-1" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/demandes/delete/{id}(id=${d.id})}"
+                                   onclick="return confirm('Supprimer cette demande ?')"
+                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-muted small" th:text="'Total : ' + ${demandes.size()} + ' demande(s)'"></div>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

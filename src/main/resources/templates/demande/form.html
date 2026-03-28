@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Demande de congé')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/menu :: menu}" th:with="activePage='demandes'"></div>
+    <div class="main-content flex-grow-1">
+
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-file-earmark-plus-fill text-warning me-2"></i>
+                <span th:text="${demande.id == null} ? 'Nouvelle demande de congé' : 'Modifier la demande'"></span>
+            </h2>
+            <p class="text-muted mb-0">Renseignez les informations de la demande</p>
+        </div>
+
+        <div class="card p-4" style="max-width:600px;">
+            <form th:action="@{/demandes/save}" th:object="${demande}" method="post">
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Employé</label>
+                        <select name="employeId" class="form-select" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option th:each="emp : ${employes}"
+                                    th:value="${emp.id}"
+                                    th:text="${emp.nom} + ' (' + ${emp.departement} + ')'"
+                                    th:selected="${demande.employe != null and demande.employe.id == emp.id}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Type de congé</label>
+                        <select name="typeCongeId" class="form-select" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option th:each="t : ${types}"
+                                    th:value="${t.id}"
+                                    th:text="${t.libelle} + ' (' + ${t.quotaAnnuel} + ' j/an)'"
+                                    th:selected="${demande.typeConge != null and demande.typeConge.id == t.id}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date de début</label>
+                        <input type="date" class="form-control" th:field="*{dateDebut}" required
+                               id="dateDebut" onchange="calculerJours()"/>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date de fin</label>
+                        <input type="date" class="form-control" th:field="*{dateFin}" required
+                               id="dateFin" onchange="calculerJours()"/>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">Durée estimée</label>
+                        <div class="alert alert-info py-2 mb-0" id="dureeInfo">
+                            <i class="bi bi-calendar-check me-1"></i>
+                            <span id="dureeTexte">Sélectionnez les dates pour voir la durée.</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Statut</label>
+                        <select class="form-select" th:field="*{statut}">
+                            <option value="en attente">En attente</option>
+                            <option value="accepté">Accepté</option>
+                            <option value="refusé">Refusé</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Motif <span class="text-muted fw-normal">(optionnel)</span></label>
+                        <input type="text" class="form-control" th:field="*{motif}" placeholder="Ex : Vacances en famille..."/>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-warning text-dark fw-semibold px-4">
+                        <i class="bi bi-check-lg me-1"></i> Enregistrer
+                    </button>
+                    <a href="/demandes" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function calculerJours() {
+    const debut = document.getElementById('dateDebut').value;
+    const fin   = document.getElementById('dateFin').value;
+    const txt   = document.getElementById('dureeTexte');
+    if (debut && fin) {
+        const d1 = new Date(debut), d2 = new Date(fin);
+        const jours = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
+        txt.textContent = jours + ' jour(s) de congé';
+    } else {
+        txt.textContent = 'Sélectionnez les dates pour voir la durée.';
+    }
+}
+</script>
+</body>
+</html>

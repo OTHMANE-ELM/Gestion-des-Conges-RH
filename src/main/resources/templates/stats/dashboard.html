@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Statistiques')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/menu :: menu}" th:with="activePage='stats'"></div>
+    <div class="main-content flex-grow-1">
+
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1"><i class="bi bi-bar-chart-fill text-danger me-2"></i>Tableau de bord – Statistiques</h2>
+            <p class="text-muted mb-0">Vue d'ensemble de l'activité congés du personnel</p>
+        </div>
+
+        <!-- Cartes KPI -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card primary p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total demandes</div>
+                            <div class="fw-bold fs-4 text-primary" th:text="${totalDemandes}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card warning p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-hourglass-split fs-4 text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">En attente</div>
+                            <div class="fw-bold fs-4 text-warning" th:text="${enAttente}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card success p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-check-circle fs-4 text-success"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Acceptées</div>
+                            <div class="fw-bold fs-4 text-success" th:text="${acceptees}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card danger p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="bi bi-x-circle fs-4 text-danger"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Refusées</div>
+                            <div class="fw-bold fs-4 text-danger" th:text="${refusees}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ligne 2 -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
+                    <div class="text-muted small mb-1">Taux d'acceptation</div>
+                    <div class="display-5 fw-bold text-success" th:text="${tauxAcceptation} + '%'">0%</div>
+                    <div class="progress w-100 mt-2" style="height:10px;">
+                        <div class="progress-bar bg-success"
+                             th:style="'width:' + ${tauxAcceptation} + '%'"></div>
+                    </div>
+                    <div class="text-muted small mt-2">des demandes traitées ont été acceptées</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
+                    <div class="text-muted small mb-1">Total employés</div>
+                    <div class="display-5 fw-bold text-primary" th:text="${totalEmployes}">0</div>
+                    <div class="text-muted small mt-2">employés enregistrés</div>
+                    <a href="/employes" class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="bi bi-people me-1"></i> Voir la liste
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
+                    <div class="text-muted small mb-1">Types de congé</div>
+                    <div class="display-5 fw-bold text-info" th:text="${totalTypes}">0</div>
+                    <div class="text-muted small mt-2">types de congé configurés</div>
+                    <a href="/types-conge" class="btn btn-outline-info btn-sm mt-3">
+                        <i class="bi bi-tag me-1"></i> Gérer les types
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jours consommés par département -->
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-3">
+                <i class="bi bi-building me-2 text-primary"></i>Jours consommés par département
+            </h5>
+            <div th:if="${#maps.isEmpty(joursParDepartement)}" class="text-muted text-center py-3">
+                <i class="bi bi-inbox d-block fs-4 mb-1"></i> Aucune donnée disponible.
+            </div>
+            <div th:each="entry : ${joursParDepartement}" class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="fw-semibold" th:text="${entry.key}">Département</span>
+                    <span class="text-muted small" th:text="${entry.value} + ' jours'"></span>
+                </div>
+                <div class="progress" style="height:14px; border-radius:8px;">
+                    <div class="progress-bar bg-primary"
+                         style="border-radius:8px;"
+                         th:style="'width:' + (${entry.value} * 100 / 200) + '%; border-radius:8px;'"
+                         th:text="${entry.value} + ' j'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
