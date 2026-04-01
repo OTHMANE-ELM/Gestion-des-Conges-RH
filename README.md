@@ -2,7 +2,7 @@
 
 ## 📖 Description
 
-Application full-stack de gestion des congés des employés développée avec **Spring Boot** (backend) et **React** (frontend).
+Application full-stack de gestion des congés des employés développée avec **Spring Boot** (backend) et **Thymeleaf** 
 
 Ce projet permet de :
 - Gérer les employés
@@ -17,7 +17,7 @@ Ce projet permet de :
 ### 🔙 Backend
 - Spring Boot
 - Spring Security
-- JWT (Json Web Token)
+- Thymeleaf
 - Spring Data JPA / Hibernate
 - MySQL
 - Maven
